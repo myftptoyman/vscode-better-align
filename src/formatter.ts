@@ -1,4 +1,7 @@
 import * as vscode from 'vscode';
+import window from 'vscode';
+
+import { FormatScript } from './format_script';
 
 enum TokenType {
     Invalid = 'Invalid',
@@ -62,7 +65,8 @@ export class Formatter {
         // Format
         let formatted: string[][] = [];
         for (let range of ranges) {
-            formatted.push(this.format(range));
+            // formatted.push(this.format(range));
+            formatted.push(this.formatVerilog(range));
         }
 
         // Apply
@@ -169,18 +173,18 @@ export class Formatter {
             // Tokens order are important
             if (char.match(REG_WS)) {
                 currTokenType = TokenType.Whitespace;
-            } else if (char === '"' || char === "'" || char === '`') {
+            } else if (char === '"') {
                 currTokenType = TokenType.String;
-            } else if (char === '{' || char === '(' || char === '[') {
-                currTokenType = TokenType.Block;
-            } else if (char === '}' || char === ')' || char === ']') {
-                currTokenType = TokenType.EndOfBlock;
-            } else if (
-                char === '/' &&
-                ((next === '/' && (pos > 0 ? text.charAt(pos - 1) : '') !== ':') || // only `//` but not `://`
-                    next === '*')
-            ) {
-                currTokenType = TokenType.Comment;
+            // } else if (char === '{' || char === '(' || char === '[') {
+                // currTokenType = TokenType.Block;
+            // } else if (char === '}' || char === ')' || char === ']') {
+                // currTokenType = TokenType.EndOfBlock;
+            // } else if (
+            //     char === '/' &&
+            //     ((next === '/' && (pos > 0 ? text.charAt(pos - 1) : '') !== ':') || // only `//` but not `://`
+            //         next === '*')
+            // ) {
+            //     currTokenType = TokenType.Comment;
             } else if (char === ',') {
                 if (lt.tokens.length === 0 || (lt.tokens.length === 1 && lt.tokens[0].type === TokenType.Whitespace)) {
                     currTokenType = TokenType.CommaAsWord; // Comma-first style
@@ -239,7 +243,8 @@ export class Formatter {
                     lastTokenType === TokenType.Assignment ||
                     lastTokenType === TokenType.Colon ||
                     lastTokenType === TokenType.Arrow ||
-                    lastTokenType === TokenType.Comment
+                    // lastTokenType === TokenType.Comment ||
+                    lastTokenType === TokenType.Word
                 ) {
                     if (lt.sgfntTokens.indexOf(lastTokenType) === -1) {
                         lt.sgfntTokens.push(lastTokenType);
@@ -321,7 +326,7 @@ export class Formatter {
             let lastT = info.tokens[j];
             if (
                 lastT.type === TokenType.PartialBlock ||
-                lastT.type === TokenType.EndOfBlock ||
+                // lastT.type === TokenType.EndOfBlock ||
                 lastT.type === TokenType.PartialString
             ) {
                 return true;
@@ -437,6 +442,37 @@ export class Formatter {
         }
 
         return range;
+    }
+
+    protected formatVerilog(range: LineRange): string[] {
+        let text = '';
+        let lines = [];
+        let anchorLine = range.infos[0];
+        if (!anchorLine.tokens.length) {
+            return [];
+        }
+
+        for (let info of range.infos) {
+            if (info != range.infos.at(-1)) {
+                text += info.line.text + "\n";
+            } else {
+                text += info.line.text;
+            }
+        }
+
+        let script: FormatScript = new FormatScript();
+
+        // script.format(text).then(() => {
+        //    // Alright, replace the document content with the formatted one
+        //     return script.data;
+        //    },
+        //    _ => {
+        //         // Something went wrong
+        //         window.showWarningMessage("Couldn't format the document:" + script.err);
+        //     }
+        // );
+        lines = script.format(text);
+        return lines;
     }
 
     protected format(range: LineRange): string[] {
