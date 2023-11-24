@@ -134,6 +134,7 @@ class VerilogBeautifier():
         # Split all text in word, special character, space and line return
         words = re.findall(r"`?\w+|[^\w\s]|[ \t]+|\n", txt, flags=re.MULTILINE)
         for w in words:
+            # print(self.block_state, self.state, w)
             state_end = self.isStateEnd(w)
             # Handle special case of if/else block in a split statement (like a case)
             if w=='else' and split_else:
@@ -1123,6 +1124,7 @@ class VerilogBeautifier():
                 len_ba = {'bw':0,'array':0};
                 for k,g in m.groupdict().items():
                     if g:
+                        # print(k+":"+g)
                         w = g.strip()
                         # extract all bitwidth, to get each length individually
                         if k in ['array','bw']:
@@ -1157,6 +1159,7 @@ class VerilogBeautifier():
                         len_full += 1 + len_ba['bw']
                     # if m.group('bw') :
                     #     len_full += 1 + len(m.group('bw').strip())
+                    # print(t)
                     if t!='type' and m.group('scope'):
                         len_full +=  len(m.group('scope').strip())
                     if len_full > len_max[ilvl]['type_full'] :
@@ -1277,7 +1280,7 @@ if __name__ == '__main__':
     parser.add_argument('-i','--input' , required=False,                          help='Verilog filename to beautify')
     parser.add_argument('-o','--output', required=False,           default='',    help='Output filename. Default to input filename.')
     parser.add_argument('-t','--tab'   , required=False,           default=False, help='Use tabulation for indentation (default: False')
-    parser.add_argument('-s','--space' , required=False, type=int, default=2,     help='Number of space for an indentation level. Default to 3.')
+    parser.add_argument('-s','--space' , required=False, type=int, default=4,     help='Number of space for an indentation level. Default to 3.')
     parser.add_argument('--no-oneBindPerLine', dest='oneBindPerLine', action='store_false', help='Allow more than one port binding per line in instance')
     parser.add_argument('--oneDeclPerLine', dest='oneDeclPerLine', default=True, action='store_true', help='Force only one declration per line.')
     parser.set_defaults(oneBindPerLine=True)
