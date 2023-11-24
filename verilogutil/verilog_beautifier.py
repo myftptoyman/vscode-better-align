@@ -48,7 +48,7 @@ class VerilogBeautifier():
             self.indent = self.indentSpace
         self.states = []
         self.state = ''
-        self.re_decl = re.compile(r'^[ \t]*(?:(?P<param>localparam|parameter|local|protected)\s+)?(?P<scope>\w+\:\:)?(?P<type>[A-Za-z_]\w*)[ \t]+(?P<sign>signed\b|unsigned\b)?[ \t]*(?P<bw>(?:\[('+verilogutil.re_bw+r')\][ \t]*)*)[ \t]*(?P<name>[A-Za-z_]\w*)[ \t]*(?P<array>(?:\[('+verilogutil.re_bw+r')\][ \t]*)*)(=\s*(?P<init>[^;]+))?(?P<sig_list>,[\w, \t]*)?;[ \t]*(?P<comment>.*)')
+        self.re_decl = re.compile(r'^[ \t]*(?:(?P<param>localparam|parameter|local|protected|input|output|inout)\s+)?(?P<scope>\w+\:\:)?(?P<type>[A-Za-z_]\w*)[ \t]+(?P<sign>signed\b|unsigned\b)?[ \t]*(?P<bw>(?:\[('+verilogutil.re_bw+r')\][ \t]*)*)[ \t]*(?P<name>[A-Za-z_]\w*)[ \t]*(?P<array>(?:\[('+verilogutil.re_bw+r')\][ \t]*)*)(=\s*(?P<init>[^;]+))?(?P<sig_list>,[\w, \t]*)?;[ \t]*(?P<comment>.*)')
         self.re_inst = re.compile(r'(?s)^[ \t]*\b(?P<itype>\w+)\s*(#\s*\([^;]+\))?\s*\b(?P<iname>\w+)\s*\(',re.MULTILINE)
         self.kw_block = ['module', 'class', 'interface', 'program', 'function', 'task', 'package', 'case','casex','casez', 'generate', 'covergroup', 'property', 'sequence','checker', 'fork', 'begin', '{', '(']
         if not ignoreTick:
@@ -751,7 +751,10 @@ class VerilogBeautifier():
             if ',' in s:
                 s = x[6]
             port_l.append(s)
-        max_port_len=max([len(x) for x in port_l])
+        if len(port_l) > 0:
+            max_port_len=max([len(x) for x in port_l])
+        else:
+            max_port_len = 0
         len_sign = 0
         len_type = 0
         len_type_user = 0
@@ -1179,7 +1182,7 @@ class VerilogBeautifier():
             if m:
                 # print('[sv.beautifier.decl] Line = {} -> {}'.format(line,m.groups()))
                 l = self.indent*ilvl
-                is_usertype = m.group('type') not in ['logic', 'wire', 'reg', 'bit', 'int', 'integer']
+                is_usertype = m.group('type') not in ['logic', 'wire', 'reg', 'bit', 'int', 'integer'],
                 len_type_full = len_max[ilvl]['type_full']+1
                 len_type = len_max[ilvl]['type']+1
                 t = ''
@@ -1264,7 +1267,7 @@ class VerilogBeautifier():
             else : # Not a declaration ? don't touch
                 l = line
             txt_new += l + '\n'
-        if txt[-1]!='\n':
+        if len(txt)>0 and txt[-1]!='\n':
             txt_new = txt_new[:-1]
         return txt_new
 
@@ -1276,7 +1279,7 @@ if __name__ == '__main__':
     parser.add_argument('-t','--tab'   , required=False,           default=False, help='Use tabulation for indentation (default: False')
     parser.add_argument('-s','--space' , required=False, type=int, default=2,     help='Number of space for an indentation level. Default to 3.')
     parser.add_argument('--no-oneBindPerLine', dest='oneBindPerLine', action='store_false', help='Allow more than one port binding per line in instance')
-    parser.add_argument('--oneDeclPerLine', dest='oneDeclPerLine', default=False, action='store_true', help='Force only one declration per line.')
+    parser.add_argument('--oneDeclPerLine', dest='oneDeclPerLine', default=True, action='store_true', help='Force only one declration per line.')
     parser.set_defaults(oneBindPerLine=True)
     args = parser.parse_args()
     beautifier = VerilogBeautifier(nbSpace=args.space, useTab=args.tab, oneBindPerLine=args.oneBindPerLine, oneDeclPerLine=args.oneDeclPerLine)

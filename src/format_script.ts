@@ -1,15 +1,16 @@
 import { ChildProcess, spawnSync } from 'child_process';
-import { notStrictEqual } from 'assert';
+// import { notStrictEqual } from 'assert';
 import { join } from 'path';
-import { EOL } from 'os';
+// import { EOL } from 'os';
 export class FormatScript {
     private formatter: ChildProcess;
     data: string[] = [];
     err: string;
 
     format(fileContent: string): string[] {
-        let scriptPath = join(__dirname, "verilogutil/verilog_beautifier.py");
-        let lines : string [];
+        let scriptPath = join(__dirname, "../verilogutil/verilog_beautifier.py");
+        // let scriptPath = '"'+ __dirname + '../verilogutil/verilog_beautifier.py"';
+        // let lines : string [];
 
         // Setup stdout events and parsing
         let promise = spawnSync('python3', [scriptPath], { input : fileContent});
