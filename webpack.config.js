@@ -26,7 +26,8 @@ const extensionConfig = {
 		'@opentelemetry/tracing': 'commonjs @opentelemetry/tracing', // ignored because we don't ship this module
 		'@opentelemetry/instrumentation': 'commonjs @opentelemetry/instrumentation', // ignored because we don't ship this module
 		'@azure/opentelemetry-instrumentation-azure-sdk': 'commonjs @azure/opentelemetry-instrumentation-azure-sdk', // ignored because we don't ship this module
-    '@azure/functions-core': 'commonjs @azure/functions-core' 
+    '@azure/functions-core': 'commonjs @azure/functions-core',
+    child_process : 'commonjs child_process'
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
